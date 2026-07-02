@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TOEIC Reading Test - Ôn Luyện</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #253348;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* HOME SCREEN */
+  .home-header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 32px 20px 24px; text-align: center; }
+  .home-header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .home-header p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 6px; }
+  .stats-bar { display: flex; gap: 12px; padding: 16px 16px 0; }
+  .stat-card { flex: 1; background: var(--surface); border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+  .stat-card .num { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .section-title { padding: 20px 16px 10px; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .chapter-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .chapter-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.15s; }
+  .chapter-btn:active { transform: scale(0.98); background: var(--surface2); }
+  .chapter-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .chapter-info { flex: 1; }
+  .chapter-info h3 { font-size: 14px; font-weight: 600; }
+  .chapter-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .chapter-progress { font-size: 12px; font-weight: 700; color: var(--success); }
+  .action-grid { padding: 8px 16px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .action-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 12px; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn .icon { font-size: 24px; margin-bottom: 6px; }
+  .action-btn .title { font-size: 13px; font-weight: 600; }
+  .action-btn .desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .action-btn.highlight { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-color: transparent; }
+  .action-btn.highlight .desc { color: rgba(255,255,255,0.7); }
+
+  /* QUIZ SCREEN */
+  .quiz-header { background: var(--surface); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .back-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--surface2); border: none; color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .quiz-meta { flex: 1; }
+  .quiz-meta .title { font-size: 14px; font-weight: 600; }
+  .quiz-meta .sub { font-size: 12px; color: var(--text-muted); }
+  .progress-bar { height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+  .question-body { padding: 16px; flex: 1; overflow-y: auto; }
+  .question-num { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+  .question-text { font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 20px; }
+  .option-list { display: flex; flex-direction: column; gap: 10px; }
+  .option { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; transition: all 0.15s; }
+  .option:active { transform: scale(0.99); }
+  .option.selected { border-color: var(--primary); background: rgba(79,70,229,0.1); }
+  .option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .option-label { width: 26px; height: 26px; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .option.selected .option-label { background: var(--primary); }
+  .option.correct .option-label { background: var(--success); }
+  .option.wrong .option-label { background: var(--danger); }
+  .option-text { font-size: 14px; line-height: 1.4; padding-top: 2px; }
+  .feedback-box { margin-top: 16px; padding: 14px 16px; border-radius: var(--radius); }
+  .feedback-box.correct { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); }
+  .feedback-box.wrong { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); }
+  .feedback-box p { font-size: 14px; font-weight: 600; }
+  .quiz-footer { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg); }
+  .next-btn { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: var(--radius); color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .next-btn:active { transform: scale(0.98); background: var(--primary-dark); }
+  .next-btn:disabled { background: var(--border); color: var(--text-muted); cursor: default; }
+
+  /* RESULT SCREEN */
+  .result-body { padding: 24px 16px; flex: 1; overflow-y: auto; }
+  .result-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--primary) var(--pct), var(--surface) 0); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }
+  .result-circle::before { content:''; position:absolute; width:110px; height:110px; border-radius:50%; background: var(--bg); }
+  .result-pct { position: relative; z-index: 1; font-size: 28px; font-weight: 800; }
+  .result-title { text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .result-sub { text-align: center; font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .result-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .res-stat { background: var(--surface); border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+  .res-stat .n { font-size: 22px; font-weight: 700; }
+  .res-stat .l { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .wrong-list-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .wrong-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .wrong-item .q-num { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+  .wrong-item .q-text { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
+  .wrong-item .ans-row { display: flex; gap: 8px; }
+  .ans-tag { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+  .ans-tag.yours { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+  .ans-tag.correct { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+  .result-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  .result-btns button { width: 100%; padding: 14px; border-radius: var(--radius); border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border) !important; }
+
+  /* REVIEW SCREEN */
+  .review-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .review-item .r-chap { font-size: 11px; color: var(--primary); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .review-item .r-num { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .review-item .r-q { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
+  .review-item .r-opts { display: flex; flex-direction: column; gap: 6px; }
+  .r-opt { font-size: 13px; padding: 8px 12px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); line-height: 1.3; }
+  .r-opt.is-correct { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.4); color: #6ee7b7; font-weight: 600; }
+
+  /* FLASH CARD */
+  .flash-container { perspective: 1000px; padding: 20px 16px; display: flex; justify-content: center; }
+  .flash-card { width: 100%; max-width: 420px; height: 250px; position: relative; cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s; }
+  .flash-card.flipped { transform: rotateY(180deg); }
+  .flash-face { position: absolute; inset: 0; border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; text-align: center; }
+  .flash-front { background: linear-gradient(135deg, #1e3a5f, #1e293b); border: 2px solid var(--primary); }
+  .flash-back { background: linear-gradient(135deg, #064e3b, #1e293b); border: 2px solid var(--success); transform: rotateY(180deg); }
+  .flash-front .hint { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+  .flash-front .q-text { font-size: 15px; font-weight: 600; line-height: 1.5; }
+  .flash-back .ans { font-size: 18px; font-weight: 800; color: var(--success); margin-bottom: 8px; }
+  .flash-back .full-ans { font-size: 14px; color: #a7f3d0; line-height: 1.4; }
+  .flash-nav { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 0 16px 12px; }
+  .flash-nav button { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 20px; width: 46px; height: 46px; cursor: pointer; }
+  .flash-nav .flash-count { font-size: 14px; color: var(--text-muted); font-weight: 600; min-width: 70px; text-align: center; }
+
+  /* SETTINGS / CHAPTER SELECT */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; padding: 20px 16px 32px; width: 100%; max-height: 80vh; overflow-y: auto; }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-opts { display: flex; flex-direction: column; gap: 8px; }
+  .modal-opt { padding: 14px 16px; background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .modal-opt.active { border-color: var(--primary); background: rgba(79,70,229,0.12); }
+  .modal-opt-label { font-size: 14px; font-weight: 600; }
+  .modal-opt-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .modal-btn { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: var(--radius); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+  .count-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+  .count-opt { padding: 8px 16px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .count-opt.active { border-color: var(--primary); background: rgba(79,70,229,0.15); color: var(--primary); }
+
+  /* TOAST */
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; z-index: 200; transition: transform 0.3s; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 50; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 0; color: var(--text-muted); font-size: 10px; font-weight: 600; transition: color 0.15s; }
+  .nav-item.active { color: var(--primary); }
+  .nav-item .nav-icon { font-size: 22px; }
+
+  .home-scroll { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+  .review-scroll { flex: 1; overflow-y: auto; padding: 16px 16px 80px; }
+  .flash-scroll { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+  .flash-top { padding: 16px 16px 0; }
+  .flash-top select { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; }
+  .search-bar { padding: 12px 16px; }
+  .search-bar input { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; }
+  .search-bar input:focus { border-color: var(--primary); }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  
+  @media (min-width: 600px) {
+    .question-body, .result-body, .review-scroll, .flash-scroll { max-width: 600px; margin: 0 auto; }
+    .flash-container { max-width: 600px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="screen active">
+  <div class="home-scroll">
+    <div class="home-header">
+      <h1>📝 TOEIC Reading Test</h1>
+      <p>120 câu hỏi · 5 bài test</p>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">Đã học</div></div>
+      <div class="stat-card"><div class="num" id="statCorrect" style="color:var(--success)">0%</div><div class="label">Đúng</div></div>
+      <div class="stat-card"><div class="num" id="statStreak" style="color:var(--warning)">0</div><div class="label">Streak 🔥</div></div>
+    </div>
+    <div class="section-title">Chọn chương</div>
+    <div class="chapter-list" id="chapterList"></div>
+    <div class="section-title">Bắt đầu học</div>
+    <div class="action-grid">
+      <div class="action-btn highlight" onclick="startQuiz('all','random')">
+        <div class="icon">🎲</div>
+        <div class="title">Kiểm tra ngẫu nhiên</div>
+        <div class="desc">Tất cả câu hỏi</div>
+      </div>
+      <div class="action-btn" onclick="openModal('review-wrong')">
+        <div class="icon">❌</div>
+        <div class="title">Ôn câu sai</div>
+        <div class="desc">Tập trung điểm yếu</div>
+      </div>
+      <div class="action-btn" onclick="startFlash('all')">
+        <div class="icon">🃏</div>
+        <div class="title">Flash Card</div>
+        <div class="desc">Học nhanh đáp án</div>
+      </div>
+      <div class="action-btn" onclick="openModal('exam')">
+        <div class="icon">📝</div>
+        <div class="title">Thi thử</div>
+        <div class="desc">30 câu ngẫu nhiên</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="quiz-meta">
+      <div class="title" id="quizTitle">Quiz</div>
+      <div class="sub" id="quizSub">Câu 1 / 10</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="quizProgress"></div></div>
+  <div class="question-body" id="questionBody">
+    <div class="question-num" id="questionNum"></div>
+    <div class="question-text" id="questionText"></div>
+    <div class="option-list" id="optionList"></div>
+    <div id="feedbackBox" style="display:none"></div>
+  </div>
+  <div class="quiz-footer">
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>Chọn đáp án...</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="screen">
+  <div style="background:var(--surface); padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border);">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span style="font-size:16px; font-weight:700;">Kết quả</span>
+  </div>
+  <div class="result-body" id="resultBody"></div>
+</div>
+
+<!-- REVIEW SCREEN -->
+<div id="reviewScreen" class="screen">
+  <div style="background:var(--surface); padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); position:sticky;top:0;z-index:10;">
+    <button class="back-btn" onclick="showTab('home')">←</button>
+    <span style="font-size:16px; font-weight:700;">📚 Xem lại toàn bộ</span>
+  </div>
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Tìm kiếm câu hỏi..." id="searchInput" oninput="filterReview()">
+  </div>
+  <div style="padding: 0 16px 8px; display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;" id="reviewChapFilter"></div>
+  <div class="review-scroll" id="reviewList"></div>
+</div>
+
+<!-- FLASH SCREEN -->
+<div id="flashScreen" class="screen">
+  <div style="background:var(--surface); padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border);">
+    <button class="back-btn" onclick="showTab('home')">←</button>
+    <span style="font-size:16px; font-weight:700;">🃏 Flash Card</span>
+  </div>
+  <div class="flash-scroll">
+    <div class="flash-top">
+      <select id="flashChapSelect" onchange="loadFlash()">
+        <option value="all">Tất cả chương</option>
+      </select>
+    </div>
+    <div class="flash-nav" style="padding:12px 16px 0;">
+      <button onclick="prevFlash()">←</button>
+      <span class="flash-count" id="flashCount">1 / 1</span>
+      <button onclick="nextFlash()">→</button>
+    </div>
+    <div class="flash-container">
+      <div class="flash-card" id="flashCard" onclick="flipCard()">
+        <div class="flash-face flash-front" id="flashFront">
+          <div class="hint">Nhấn để xem đáp án</div>
+          <div class="q-text" id="flashQ"></div>
+        </div>
+        <div class="flash-face flash-back" id="flashBack">
+          <div class="ans" id="flashAnsLetter"></div>
+          <div class="full-ans" id="flashAnsFull"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; padding:0 16px 20px; justify-content:center;">
+      <button onclick="shuffleFlash()" style="background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--text); padding:10px 20px; font-size:14px; cursor:pointer;">🔀 Xáo trộn</button>
+      <button onclick="resetFlash()" style="background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--text); padding:10px 20px; font-size:14px; cursor:pointer;">🔄 Đặt lại</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="nav-item active" onclick="showTab('home')" id="navHome">
+    <div class="nav-icon">🏠</div><span>Trang chủ</span>
+  </div>
+  <div class="nav-item" onclick="showTab('review')" id="navReview">
+    <div class="nav-icon">📖</div><span>Xem lại</span>
+  </div>
+  <div class="nav-item" onclick="showTab('flash')" id="navFlash">
+    <div class="nav-icon">🃏</div><span>Flash</span>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="e=>e.target===this&&closeModal()">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CHAPTERS = [
+  { id: 'test1', name: 'Test 1', full: 'TOEIC Reading Test 1', icon: '📝', color: '#6366f1' },
+  { id: 'test5', name: 'Test 5', full: 'TOEIC Reading Test 5', icon: '📝', color: '#8b5cf6' },
+  { id: 'test8', name: 'Test 8', full: 'TOEIC Reading Test 8', icon: '📝', color: '#06b6d4' },
+  { id: 'test9', name: 'Test 9', full: 'TOEIC Reading Test 9', icon: '📝', color: '#10b981' },
+  { id: 'test10', name: 'Test 10', full: 'TOEIC Reading Test 10', icon: '📝', color: '#f59e0b' },
+];
+
+const RAW_QUESTIONS = [
+  // TEST 1
+  {ch:'test1',n:101,q:'A ________ salesperson assisted Ms. Han with choosing a new computer.',opts:['help','helpfully','helpful','helped'],ans:'C'},
+  {ch:'test1',n:102,q:'Author Daniel Aiduk ________ gives talks at national writing conferences.',opts:['gradually','longer','together','regularly'],ans:'D'},
+  {ch:'test1',n:103,q:'Mr. Kohl has a great deal of ________ performing cost analysis tasks.',opts:['experience','experienced','experiencing','experiencer'],ans:'A'},
+  {ch:'test1',n:104,q:'To make an ________, clients can click on "Schedule" at the top right corner of the home page.',opts:['example','option','individual','appointment'],ans:'D'},
+  {ch:'test1',n:105,q:'The used coffee grounds should be disposed of at the end of ________ business day.',opts:['now','each','whose','and'],ans:'B'},
+  {ch:'test1',n:106,q:'Our company\'s efforts to hire new workers have intensified ________ so many employees have recently retired.',opts:['because','although','instead','unless'],ans:'A'},
+  {ch:'test1',n:107,q:'The occurrence of heavy rains during the month of May is fairly ________.',opts:['predict','predicts','predicting','predictable'],ans:'D'},
+  {ch:'test1',n:108,q:'Remind customers to return their rental car ________ a full tank of fuel.',opts:['with','from','except','toward'],ans:'A'},
+  {ch:'test1',n:109,q:'________ the winter season, Serina Builders will once again offer roof installations and repairs.',opts:['Such as','Moreover','After','Whereas'],ans:'C'},
+  {ch:'test1',n:110,q:'The lights in the cinema ________ before a movie begins.',opts:['dim','dimming','dimmer','dims'],ans:'D'},
+  {ch:'test1',n:111,q:'When scheduling a meeting, please be ________ of colleagues in other time zones.',opts:['significant','mindful','exclusive','serious'],ans:'B'},
+  {ch:'test1',n:112,q:'Greentrim\'s product sales rose ________ following the introduction of its new shipping policy.',opts:['sharp','sharper','sharply','sharpest'],ans:'C'},
+  {ch:'test1',n:113,q:'Please ________ Hearnshaw for all your home appliance needs.',opts:['assemble','balance','share','consider'],ans:'D'},
+  {ch:'test1',n:114,q:'Monday will be the best day for ________ to clean the carpet in the lobby.',opts:['we','us','ours','ourselves'],ans:'B'},
+  {ch:'test1',n:115,q:'Hikers, ________ to explore the newly opened trails, have been visiting Millar Nature Reserve in record numbers.',opts:['tender','bright','vast','eager'],ans:'D'},
+  {ch:'test1',n:116,q:'KOHW ________ Jenae Johnson will be promoted to news anchor when Dana Wagner retires.',opts:['reporter','reporting','to report','will report'],ans:'D'},
+  {ch:'test1',n:117,q:'Residents ________ raised concerns about the project\'s impact on traffic congestion.',opts:['extremely','unlikely','densely','primarily'],ans:'A'},
+  {ch:'test1',n:118,q:'________ your Fromo grocery order is placed before 10:00 A.M., it will be delivered the same day.',opts:['That','Such','As long as','In spite of'],ans:'C'},
+  {ch:'test1',n:119,q:'The finance department will be ________ a lunch-and-learn session on Wednesday.',opts:['contacting','collecting','meeting','holding'],ans:'D'},
+  {ch:'test1',n:120,q:'________ clothing must be worn by all personnel entering the construction zone.',opts:['Protective','Protecting','Protect','Protects'],ans:'A'},
+  {ch:'test1',n:121,q:'At the Star Elite membership level, most flight changes can be made ________ incurring a rebooking fee.',opts:['along','without','until','inside'],ans:'B'},
+  {ch:'test1',n:122,q:'Any letter ________ sensitive information should be sent using a courier service.',opts:['contains','containing','will contain','has contained'],ans:'B'},
+  {ch:'test1',n:123,q:'Abelos Café sources its vegetables and fruit from local farms ________ possible.',opts:['anyhow','whenever','once','very'],ans:'B'},
+  {ch:'test1',n:124,q:'Demand for the Waterlace running shoes was so high that the store owner set a ________ of two pairs per customer.',opts:['limit','price','supply','procedure'],ans:'A'},
+  {ch:'test1',n:125,q:'The new security camera adjusts ________ in such a way that it can record quality video at night.',opts:['himself','oneself','itself','herself'],ans:'C'},
+  {ch:'test1',n:126,q:'Contact Ms. Meyer if you would like a hard copy of the budget analysis ________ during the president\'s presentation.',opts:['occurred','mentioned','learned','served'],ans:'B'},
+  {ch:'test1',n:127,q:'Saul\'s Pizzeria changed its menu options after receiving ________ negative customer feedback.',opts:['increase','increases','to increase','increasingly'],ans:'D'},
+  {ch:'test1',n:128,q:'Topiccolor produces devices intended for use by ________ photographers.',opts:['visible','eventual','amateur','necessary'],ans:'C'},
+  {ch:'test1',n:129,q:'The study of consumer behavior will be repeated in order to ensure the ________ of the results.',opts:['rely','relies','reliable','reliability'],ans:'D'},
+  {ch:'test1',n:130,q:'Check e-mail ________ throughout the day to make sure important client communications are not overlooked.',opts:['artificially','periodically','reluctantly','simultaneously'],ans:'B'},
+  
+  // TEST 5
+  {ch:'test5',n:101,q:'Ms. Abe will order supplies tomorrow, ________ tell her right away if you need anything.',opts:['than','wait','so','about'],ans:'C'},
+  {ch:'test5',n:102,q:'The Knysya Theater requests that all electronic devices be silenced ________ the play begins.',opts:['also','but','unless','before'],ans:'D'},
+  {ch:'test5',n:103,q:'________ Human Resources if you have questions about taking time off from work.',opts:['Contacting','Contacted','Contacts','Contact'],ans:'D'},
+  {ch:'test5',n:104,q:'________ eighty thousand people attended yesterday\'s soccer match.',opts:['Almost','More','Often','Enough'],ans:'A'},
+  {ch:'test5',n:105,q:'Online visitors report that our company\'s Web site is somewhat ________.',opts:['confuse','confuses','confusing','confusion'],ans:'C'},
+  {ch:'test5',n:106,q:'Traffic ________ are expected next week along Reimers Road.',opts:['drivers','crowds','delays','needs'],ans:'C'},
+  {ch:'test5',n:107,q:'Shaloub Hospital wants to hire several more ________ qualified laboratory workers.',opts:['higher','highest','high','highly'],ans:'D'},
+  {ch:'test5',n:108,q:'Whenever you are the ________ person to exit a room, please turn off the lights.',opts:['last','inside','finish','near'],ans:'A'},
+  {ch:'test5',n:109,q:'Following a brief ________ with the chief technician, Mr. Moore agreed to update the operations manual.',opts:['converses','conversation','conversational','conversationally'],ans:'B'},
+  {ch:'test5',n:110,q:'After record profits, Golden Shamrock Jewelry\'s stock price increased ________ our expectations.',opts:['beside','beyond','behind','between'],ans:'B'},
+  {ch:'test5',n:111,q:'We cannot ________ the filming of our documentary, Morning after Night, without sufficient funding.',opts:['completely','completion','complete','completing'],ans:'C'},
+  {ch:'test5',n:112,q:'Get to the station a few minutes early because Mr. Xu\'s train will arrive ________ at 7:00 P.M.',opts:['carefully','unexpectedly','promptly','clearly'],ans:'C'},
+  {ch:'test5',n:113,q:'________ can be done to revise your order, since the merchandise has already shipped.',opts:['Ours','Nobody','Others','Nothing'],ans:'D'},
+  {ch:'test5',n:114,q:'Recent graduates tend to ________ workplaces where teamwork and collaboration are encouraged.',opts:['think','apply','extend','prefer'],ans:'D'},
+  {ch:'test5',n:115,q:'Zhang Cleaning takes great care to ensure that all its employees follow specific cleaning ________.',opts:['proceeds','procedures','procedural','proceeding'],ans:'B'},
+  {ch:'test5',n:116,q:'Mumbai Jewel is a widely acclaimed restaurant, mainly ________ its delicious buffet dinners.',opts:['such as','not only','because of','together with'],ans:'C'},
+  {ch:'test5',n:117,q:'Before a job interview, it is critical to prepare ________ for answering the most commonly asked questions.',opts:['whose','whichever','theirs','oneself'],ans:'D'},
+  {ch:'test5',n:118,q:'While it is not ________, staff are encouraged to read Joan Frantz\'s book Balancing Work and Life.',opts:['required','published','limited','guaranteed'],ans:'A'},
+  {ch:'test5',n:119,q:'It is ________ to bring sturdy boots to wear on the hike.',opts:['advise','advisor','advisable','advises'],ans:'C'},
+  {ch:'test5',n:120,q:'Nordel Park will open for the season once average daytime temperatures reach ________ 15 degrees.',opts:['at least','as of','along with','ahead of'],ans:'A'},
+  {ch:'test5',n:121,q:'Before investing, Mr. Hwang will wait for greater ________ that Briomer Tech is fully committed to the project.',opts:['assure','assured','assuredly','assurance'],ans:'D'},
+  {ch:'test5',n:122,q:'Tralim Consulting\'s annual profits are expected to ________ exceed €5 million.',opts:['exactly','extremely','eventually','evenly'],ans:'C'},
+  {ch:'test5',n:123,q:'Although many factors contribute to a successful business, Mr. Lee thinks that keeping customers satisfied is the ________.',opts:['essential','most essential','essentially','more essentially'],ans:'B'},
+  {ch:'test5',n:124,q:'Ms. Alshammari took a full hour to ________ each of the budget changes during the staff meeting.',opts:['detail','attend','respond','comply'],ans:'A'},
+  {ch:'test5',n:125,q:'It is recommended that clients book the Desert Rose Ballroom for their event more than four months ________.',opts:['over time','in advance','up to now','far ahead'],ans:'B'},
+  {ch:'test5',n:126,q:'For a true understanding of our production levels, data from oil-drilling sites must be as ________ as possible.',opts:['accurate','optimistic','exclusive','competitive'],ans:'A'},
+  {ch:'test5',n:127,q:'Adopting advanced billing software would improve Narrin Group\'s fiscal-management process ________.',opts:['substantial','substantially','more substantial','substances'],ans:'B'},
+  {ch:'test5',n:128,q:'Thanks to the effective ________ of Drinkever\'s first beverage, last month\'s product launch was a success.',opts:['service','promotion','response','information'],ans:'B'},
+  {ch:'test5',n:129,q:'By this time next year, Grasswell Industries ________ two new plants in eastern Europe.',opts:['opens','will have opened','is opening','had opened'],ans:'B'},
+  {ch:'test5',n:130,q:'Please put an ________ supply of premium snack items on the carts for the next flight.',opts:['absolute','earned','adequate','energetic'],ans:'C'},
+  
+  // TEST 8
+  {ch:'test8',n:101,q:'Mr. Pierce requested that all employees meet in ________ office at noon.',opts:['himself','his','him','he'],ans:'B'},
+  {ch:'test8',n:102,q:'We greatly appreciate ________ in preparing your office for the upcoming move.',opts:['cooperates','cooperated','cooperation','cooperate'],ans:'C'},
+  {ch:'test8',n:103,q:'Employees who ________ to contribute to the company picnic should contact Mr. Liu.',opts:['require','supply','wish','express'],ans:'C'},
+  {ch:'test8',n:104,q:'Ms. Ngo will make the awards announcement ________ the luncheon next week.',opts:['up','onto','off','at'],ans:'D'},
+  {ch:'test8',n:105,q:'As of October 1, Ms. Givens will be planning ________ department\'s travel.',opts:['budgeted','budget','budgetary','budgeter'],ans:'B'},
+  {ch:'test8',n:106,q:'Job applicants are ________ encouraged to submit a work portfolio and a resume.',opts:['rapidly','strongly','nearly','tightly'],ans:'B'},
+  {ch:'test8',n:107,q:'Join us for dinner on Friday ________ Mr. Yi\'s promotion to Vice President of Marketing.',opts:['to celebrate','celebrates','will celebrate','celebrated'],ans:'A'},
+  {ch:'test8',n:108,q:'The ________ of 21 tools ordered will be delivered to the Abby Street warehouse this afternoon.',opts:['set','room','fit','power'],ans:'A'},
+  {ch:'test8',n:109,q:'Galaxy Health Club offers a 20 percent discount for all classes ________ November.',opts:['entire','during','while','ever'],ans:'B'},
+  {ch:'test8',n:110,q:'________ the printer cartridge was installed correctly, it leaked some ink.',opts:['Although','So','If','However'],ans:'A'},
+  {ch:'test8',n:111,q:'Ms. Chu will explain how the factory workers can protect ________ equipment from damage.',opts:['theirs','them','themselves','their'],ans:'D'},
+  {ch:'test8',n:112,q:'Promotional ideas for violinist Zelina Ortiz will be ________ by the publicity team next month.',opts:['escorted','tutored','discussed','subscribed'],ans:'C'},
+  {ch:'test8',n:113,q:'Giffords Global Investors Magazine experienced its highest numbers in ________ sales in the last quarter.',opts:['digits','digital','digit','digitize'],ans:'B'},
+  {ch:'test8',n:114,q:'A new barbershop is opening ________ the neighborhood already has three others.',opts:['among','that','prior to','even though'],ans:'D'},
+  {ch:'test8',n:115,q:'Now that Rocker Guitar School is a ________ enterprise, it can afford to hire additional teachers.',opts:['musical','profitable','compact','long'],ans:'B'},
+  {ch:'test8',n:116,q:'The renovated office building ________ not look the way Ms. Garcia ________ it would.',opts:['imagine','imagining','imagined','imagination'],ans:'C'},
+  {ch:'test8',n:117,q:'Arsov Consulting advised us to wait until the ________ to ship the new line of sweaters.',opts:['summer','year','hours','weather'],ans:'A'},
+  {ch:'test8',n:118,q:'The heads of ________ department in the company must attend the training session in Kolkata.',opts:['its','each','most','several'],ans:'B'},
+  {ch:'test8',n:119,q:'Vurk Ltd., manufacturer of industrial sewing machines, is ________ to introduce a line of home products soon.',opts:['applied','expected','inquired','objected'],ans:'B'},
+  {ch:'test8',n:120,q:'Reception desk personnel are thoroughly trained to answer ________ that hotel guests may have.',opts:['questioner','questioned','questions','questionable'],ans:'C'},
+  {ch:'test8',n:121,q:'Wyckshire Mobile\'s unlimited talk, text, and data plan is priced ________ at £50.00 per month.',opts:['promptly','reasonably','partially','loyally'],ans:'B'},
+  {ch:'test8',n:122,q:'Khaab Staffers announced its acquisition of an international database of ________ 5,000 companies sorted by location or industry.',opts:['many','beside','wide','over'],ans:'D'},
+  {ch:'test8',n:123,q:'The presence of several eagle nests makes Hilltop Grove a ________ site for ________ bird watchers.',opts:['enthusiastic','affordable','elaborate','comparable'],ans:'A'},
+  {ch:'test8',n:124,q:'The general manager has implemented a system ________ to fill online orders of costume jewelry lines ________ quickly.',opts:['quick','quickest','quicker','quickly'],ans:'D'},
+  {ch:'test8',n:125,q:'Quillet Motors has been working ________ the goal of reducing its factory emissions by 25 percent since last year.',opts:['after','across','opposite','toward'],ans:'D'},
+  {ch:'test8',n:126,q:'Gribson & Kim\'s ________ brand identity accurately conveys the company\'s image and values.',opts:['powers','powered','powerful','powerfully'],ans:'C'},
+  {ch:'test8',n:127,q:'The city council ________ Remco\'s application to build a shopping center ________ opposition from local residents.',opts:['in spite of','in order that','even so','on the contrary'],ans:'A'},
+  {ch:'test8',n:128,q:'Marliet Marketing can ________ any business ________ its products through multimedia advertising packages.',opts:['promote','promoted','promotable','promoter'],ans:'A'},
+  {ch:'test8',n:129,q:'Local reporters sought ________ with the department manager who found old property records in the city hall basement.',opts:['permits','materials','conditions','interviews'],ans:'D'},
+  {ch:'test8',n:130,q:'To appeal to younger consumers throughout Asia, the sportswear company is ________ its marketing tactics ________.',opts:['drama','dramatic','dramatically','more dramatic'],ans:'C'},
+  
+  // TEST 9
+  {ch:'test9',n:101,q:'There is coffee in the break room for anyone who ________ a cup before the meeting.',opts:['want','wants','wanting','to want'],ans:'B'},
+  {ch:'test9',n:102,q:'Each Ready Wear suitcase comes ________ a ten-year warranty.',opts:['if','with','so','upon'],ans:'B'},
+  {ch:'test9',n:103,q:'Mr. O\'Sullivan oversaw the electrical work in the new apartment building ________ the river.',opts:['into','as','to','by'],ans:'D'},
+  {ch:'test9',n:104,q:'For questions about your hotel reservation, please telephone ________ booking department at 555-0109.',opts:['we','us','our','ourselves'],ans:'C'},
+  {ch:'test9',n:105,q:'Janet Rhodes was commended for ________ defending the company\'s reputation.',opts:['assertively','assert','assertive','assertion'],ans:'A'},
+  {ch:'test9',n:106,q:'A second order for 500 recycled paper cups ________ last week.',opts:['was placed','was placing','to place','placed'],ans:'A'},
+  {ch:'test9',n:107,q:'One of the ________ for the position is three years of customer service experience.',opts:['associates','requirements','tips','assistants'],ans:'B'},
+  {ch:'test9',n:108,q:'________ will receive a weekly e-mail reminding them to approve time sheets.',opts:['Supervises','Supervisory','Supervisors','Supervising'],ans:'C'},
+  {ch:'test9',n:109,q:'As of next week, the hotel chain Contempo Inns will be ________ new management.',opts:['across','under','beside','near'],ans:'B'},
+  {ch:'test9',n:110,q:'Managers can access information about ________ staff members by contacting Human Resources.',opts:['whose','while','their','much'],ans:'C'},
+  {ch:'test9',n:111,q:'After eighteen years in business, Chu Home Health Services remains committed to customer ________.',opts:['satisfaction','production','energy','opportunity'],ans:'A'},
+  {ch:'test9',n:112,q:'The obstetrics nurses ________ are working under Dorothy Caramella will now be working for Pierre Cocteau.',opts:['they','who','when','these'],ans:'B'},
+  {ch:'test9',n:113,q:'Visitor parking is ________ behind the office complex on Mayfield Avenue.',opts:['adjusted','visual','available','urgent'],ans:'C'},
+  {ch:'test9',n:114,q:'Among other ________, purchasing departments negotiate contracts to procure goods at the best possible prices.',opts:['tasks','task','tasking','tasked'],ans:'A'},
+  {ch:'test9',n:115,q:'The community swimming pool will be constructed ________ three separate stages.',opts:['for','far','in','at'],ans:'C'},
+  {ch:'test9',n:116,q:'The Lanaya 7 laptop ________ its debut at the annual Deibar Tech Summit.',opts:['made','knew','heard','drew'],ans:'A'},
+  {ch:'test9',n:117,q:'Enjoy one month free when you start your company on Rooster\'s e-mail ________ Web hosting service.',opts:['then','yet','but','and'],ans:'C'},
+  {ch:'test9',n:118,q:'The bridge project bids turned out to be ________ higher than expected.',opts:['considering','consider','consideration','considerably'],ans:'D'},
+  {ch:'test9',n:119,q:'Contract negotiations are now close ________ to completion to sign the deal by Thursday.',opts:['already','quite','such','enough'],ans:'D'},
+  {ch:'test9',n:120,q:'Fiber Woodworking reminds customers that direct sunlight will cause ________ damage to furniture.',opts:['lasting','lasts','last','lastly'],ans:'C'},
+  {ch:'test9',n:121,q:'________ employees wishing to take time off must submit the request two weeks in advance.',opts:['Each','All','Every','Total'],ans:'C'},
+  {ch:'test9',n:122,q:'Bronco Building Equipment uses data to make ________ decisions and plot future operations.',opts:['strategized','strategic','strategize','strategically'],ans:'B'},
+  {ch:'test9',n:123,q:'In addition to the evening concert series, Centennial Park will ________ be hosting several events for children this summer.',opts:['nevertheless','although','consequently','also'],ans:'D'},
+  {ch:'test9',n:124,q:'Because ________ spaces in the mall now have tenants, foot traffic has increased greatly.',opts:['that much','after which','in case','so many'],ans:'D'},
+  {ch:'test9',n:125,q:'Complete the form carefully to ensure the ________ processing of your application.',opts:['rapidly','more rapidly','most rapid','rapidity'],ans:'C'},
+  {ch:'test9',n:126,q:'Changes to the Top Fizz soft-drink formulation failed to ________ to consumers.',opts:['remain','result','appreciate','appeal'],ans:'D'},
+  {ch:'test9',n:127,q:'The Liu Supermarket ________ that Jennifer Chan will take over as CEO next month came as a surprise.',opts:['announced','announcement','announcing','announcer'],ans:'A'},
+  {ch:'test9',n:128,q:'________ extensive renovations, Main Vault Bank will temporarily relocate to 1450 Barrister Avenue.',opts:['If only','Since','Due to','Though'],ans:'C'},
+  {ch:'test9',n:129,q:'Donell and Franklyn Investments promises incomparable loyalty and ________ to its clients.',opts:['transparent','transparency','transparencies','transparently'],ans:'B'},
+  {ch:'test9',n:130,q:'The ________ who work for ARF Recordings seek out talented but unknown musicians who are hoping to record a first album.',opts:['authors','announcers','dancers','agents'],ans:'D'},
+  
+  // TEST 10
+  {ch:'test10',n:101,q:'A ________ salesperson assisted Ms. Han with choosing a new computer.',opts:['help','helpfully','helpful','helped'],ans:'C'},
+  {ch:'test10',n:102,q:'Author Daniel Aiduk ________ gives talks at national writing conferences.',opts:['gradually','longer','together','regularly'],ans:'D'},
+  {ch:'test10',n:103,q:'Mr. Kohl has a great deal of ________ performing cost analysis tasks.',opts:['experience','experienced','experiencing','experiencer'],ans:'A'},
+  {ch:'test10',n:104,q:'To make an ________, clients can click on "Schedule" at the top right corner of the home page.',opts:['example','option','individual','appointment'],ans:'D'},
+  {ch:'test10',n:105,q:'The used coffee grounds should be disposed of at the end of ________ business day.',opts:['now','each','whose','and'],ans:'B'},
+  {ch:'test10',n:106,q:'Our company\'s efforts to hire new workers have intensified ________ so many employees have recently retired.',opts:['because','although','instead','unless'],ans:'A'},
+  {ch:'test10',n:107,q:'The occurrence of heavy rains during the month of May is fairly ________.',opts:['predict','predicts','predicting','predictable'],ans:'D'},
+  {ch:'test10',n:108,q:'Remind customers to return their rental car ________ a full tank of fuel.',opts:['with','from','except','toward'],ans:'A'},
+  {ch:'test10',n:109,q:'The information on the Web site of Croyell Decorators is ________ organized.',opts:['clear','clearing','clearest','clearly'],ans:'D'},
+  {ch:'test10',n:110,q:'The Copley Corporation is frequently ________ as a company that employs workers from all over the world.',opts:['recognized','permitted','prepared','controlled'],ans:'A'},
+  {ch:'test10',n:111,q:'Payments made ________ 4:00 P.M. will be processed on the following business day.',opts:['later','after','than','often'],ans:'B'},
+  {ch:'test10',n:112,q:'Greenfiddle Water Treatment hires engineers who have ________ mathematics skills.',opts:['adjusted','advanced','eager','faithful'],ans:'B'},
+  {ch:'test10',n:113,q:'After ________ the neighborhood, Mr. Park decided not to move his café to Thomasville.',opts:['evaluation','evaluate','evaluating','evaluated'],ans:'C'},
+  {ch:'test10',n:114,q:'The average precipitation in Campos ________ the past three years has been 22.7 centimeters.',opts:['on','for','to','under'],ans:'B'},
+  {ch:'test10',n:115,q:'Improving efficiency at Pervon Manufacturing will require a ________ revision of existing processes.',opts:['create','creativity','creation','creative'],ans:'D'},
+  {ch:'test10',n:116,q:'Conference attendees will share accommodations ________ they submit a special request for a single room.',opts:['even','unless','similarly','also'],ans:'B'},
+  {ch:'test10',n:117,q:'To receive ________, please be sure the appropriate box is checked on the magazine order form.',opts:['renew','renewed','renewals','to renew'],ans:'C'},
+  {ch:'test10',n:118,q:'Donations to the Natusi Wildlife Reserve rise when consumers feel ________ about the economy.',opts:['careful','helpful','confident','durable'],ans:'C'},
+  {ch:'test10',n:119,q:'When ________ applied, Tilda\'s Restorative Cream reduces the appearance of fine lines and wrinkles.',opts:['consistent','consist','consistently','consisting'],ans:'C'},
+  {ch:'test10',n:120,q:'The marketing director confirmed that the new software program would be ready to ________ by November 1.',opts:['launch','facilitate','arise','exert'],ans:'A'},
+  {ch:'test10',n:121,q:'At the Star Elite membership level, most flight changes can be made ________ incurring a rebooking fee.',opts:['along','without','until','inside'],ans:'B'},
+  {ch:'test10',n:122,q:'Any letter ________ sensitive information should be sent using a courier service.',opts:['contains','containing','will contain','has contained'],ans:'B'},
+  {ch:'test10',n:123,q:'Abelos Café sources its vegetables and fruit from local farms ________ possible.',opts:['anyhow','whenever','once','very'],ans:'B'},
+  {ch:'test10',n:124,q:'Demand for the Waterlace running shoes was so high that the store owner set a ________ of two pairs per customer.',opts:['limit','price','supply','procedure'],ans:'A'},
+  {ch:'test10',n:125,q:'The new security camera adjusts ________ in such a way that it can record quality video at night.',opts:['himself','oneself','itself','herself'],ans:'C'},
+  {ch:'test10',n:126,q:'Contact Ms. Meyer if you would like a hard copy of the budget analysis ________ during the president\'s presentation.',opts:['occurred','mentioned','learned','served'],ans:'B'},
+  {ch:'test10',n:127,q:'Saul\'s Pizzeria changed its menu options after receiving ________ negative customer feedback.',opts:['increase','increases','to increase','increasingly'],ans:'D'},
+  {ch:'test10',n:128,q:'Topticolor produces devices intended for use by ________ photographers.',opts:['visible','eventual','amateur','necessary'],ans:'C'},
+  {ch:'test10',n:129,q:'The study of consumer behavior will be repeated in order to ensure the ________ of the results.',opts:['rely','relies','reliable','reliability'],ans:'D'},
+  {ch:'test10',n:130,q:'Check e-mail ________ throughout the day to make sure important client communications are not overlooked.',opts:['artificially','periodically','reluctantly','simultaneously'],ans:'B'},
+];
+
+
+// ============================================================
+// STATE
+// ============================================================
+let allQuestions = [];
+let quizQuestions = [];
+let quizIndex = 0;
+let quizAnswers = [];
+let quizMode = '';
+let stats = { seen: new Set(), correct: new Set(), wrong: new Set(), streak: 0, lastDate: '' };
+let flashQuestions = [];
+let flashIndex = 0;
+let flashShuffled = [];
+let reviewFilter = 'all';
+let searchText = '';
+
+// Build question list with unique IDs
+function buildQuestions() {
+  allQuestions = RAW_QUESTIONS.map((q, i) => ({
+    ...q,
+    id: `${q.ch}_${q.n}`,
+    optIdx: ['A','B','C','D']
+  }));
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+function loadStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem('mmt_stats') || '{}');
+    stats.seen = new Set(s.seen || []);
+    stats.correct = new Set(s.correct || []);
+    stats.wrong = new Set(s.wrong || []);
+    stats.streak = s.streak || 0;
+    stats.lastDate = s.lastDate || '';
+  } catch(e) {}
+  updateStreak();
+}
+function saveStats() {
+  localStorage.setItem('mmt_stats', JSON.stringify({
+    seen: [...stats.seen], correct: [...stats.correct], wrong: [...stats.wrong],
+    streak: stats.streak, lastDate: stats.lastDate
+  }));
+}
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (stats.lastDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (stats.lastDate === yesterday) {
+    stats.streak++;
+  } else if (stats.lastDate !== today) {
+    stats.streak = 1;
+  }
+  stats.lastDate = today;
+  saveStats();
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function buildHome() {
+  // Stats
+  const pct = stats.seen.size > 0 ? Math.round(stats.correct.size / stats.seen.size * 100) : 0;
+  document.getElementById('statTotal').textContent = stats.seen.size;
+  document.getElementById('statCorrect').textContent = pct + '%';
+  document.getElementById('statStreak').textContent = stats.streak;
+
+  // Chapter list
+  const list = document.getElementById('chapterList');
+  list.innerHTML = '';
+  CHAPTERS.forEach(ch => {
+    const qList = allQuestions.filter(q => q.ch === ch.id);
+    const done = qList.filter(q => stats.seen.has(q.id)).length;
+    const div = document.createElement('div');
+    div.className = 'chapter-btn';
+    div.onclick = () => openChapterModal(ch.id);
+    div.innerHTML = `
+      <div class="chapter-icon" style="background:${ch.color}22; color:${ch.color}">${ch.icon}</div>
+      <div class="chapter-info">
+        <h3>${ch.name}: ${ch.full}</h3>
+        <p>${qList.length} câu hỏi · Đã học: ${done}</p>
+      </div>
+      <div class="chapter-progress">${done}/${qList.length}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function openChapterModal(chId) {
+  const ch = CHAPTERS.find(c => c.id === chId);
+  const qList = allQuestions.filter(q => q.ch === chId);
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">${ch.icon} ${ch.name}: ${ch.full}</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">${qList.length} câu hỏi</p>
+    <div class="modal-opts">
+      <div class="modal-opt" onclick="startQuiz('${chId}','sequential');closeModal()">
+        <div><div class="modal-opt-label">📖 Học tuần tự</div><div class="modal-opt-sub">Từ đầu đến cuối</div></div>
+        <span>›</span>
+      </div>
+      <div class="modal-opt" onclick="startQuiz('${chId}','random');closeModal()">
+        <div><div class="modal-opt-label">🎲 Kiểm tra ngẫu nhiên</div><div class="modal-opt-sub">Câu hỏi xáo trộn</div></div>
+        <span>›</span>
+      </div>
+      <div class="modal-opt" onclick="startQuizWrong('${chId}');closeModal()">
+        <div><div class="modal-opt-label">❌ Ôn câu sai</div><div class="modal-opt-sub">Câu chưa thuộc</div></div>
+        <span>›</span>
+      </div>
+      <div class="modal-opt" onclick="startFlash('${chId}');closeModal()">
+        <div><div class="modal-opt-label">🃏 Flash Card</div><div class="modal-opt-sub">Xem lướt nhanh</div></div>
+        <span>›</span>
+      </div>
+    </div>
+  `;
+  openModal();
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+function startQuiz(chId, mode, count) {
+  let pool = chId === 'all' ? [...allQuestions] : allQuestions.filter(q => q.ch === chId);
+  if (mode === 'random' || mode === 'exam') pool = shuffle(pool);
+  if (count) pool = pool.slice(0, count);
+  quizQuestions = pool;
+  quizIndex = 0;
+  quizAnswers = [];
+  quizMode = mode;
+  showScreen('quiz');
+  hideNav();
+  renderQuestion();
+}
+
+function startQuizWrong(chId) {
+  let pool = chId === 'all'
+    ? allQuestions.filter(q => stats.wrong.has(q.id))
+    : allQuestions.filter(q => q.ch === chId && stats.wrong.has(q.id));
+  if (pool.length === 0) { toast('🎉 Không có câu sai nào!'); return; }
+  pool = shuffle(pool);
+  quizQuestions = pool;
+  quizIndex = 0;
+  quizAnswers = [];
+  quizMode = 'wrong';
+  showScreen('quiz');
+  hideNav();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[quizIndex];
+  const total = quizQuestions.length;
+  const ch = CHAPTERS.find(c => c.id === q.ch);
+  document.getElementById('quizTitle').textContent = `${ch?.name || ''}: ${ch?.full || ''}`;
+  document.getElementById('quizSub').textContent = `Câu ${quizIndex+1} / ${total}`;
+  document.getElementById('quizProgress').style.width = `${(quizIndex/total)*100}%`;
+  document.getElementById('questionNum').textContent = `Câu ${q.n}`;
+  document.getElementById('questionText').textContent = q.q;
+
+  const optList = document.getElementById('optionList');
+  optList.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const el = document.createElement('div');
+    el.className = 'option';
+    el.dataset.idx = i;
+    el.innerHTML = `<div class="option-label">${labels[i]}</div><div class="option-text">${opt}</div>`;
+    el.onclick = () => selectOption(el, i, q);
+    optList.appendChild(el);
+  });
+
+  document.getElementById('feedbackBox').style.display = 'none';
+  const btn = document.getElementById('nextBtn');
+  btn.disabled = true;
+  btn.textContent = 'Chọn đáp án...';
+  document.getElementById('questionBody').scrollTop = 0;
+}
+
+function selectOption(el, idx, q) {
+  if (document.getElementById('nextBtn').disabled === false && document.getElementById('nextBtn').textContent !== 'Chọn đáp án...') return;
+  const labels = ['A','B','C','D'];
+  const chosen = labels[idx];
+  const correct = q.ans;
+  const isCorrect = chosen === correct;
+
+  // Update stats
+  stats.seen.add(q.id);
+  if (isCorrect) {
+    stats.correct.add(q.id);
+    stats.wrong.delete(q.id);
+  } else {
+    stats.wrong.add(q.id);
+  }
+  saveStats();
+
+  quizAnswers.push({ qid: q.id, chosen, correct, isCorrect, q });
+
+  // Style options
+  document.querySelectorAll('.option').forEach(o => {
+    const i = parseInt(o.dataset.idx);
+    if (labels[i] === correct) o.classList.add('correct');
+    else if (i === idx) o.classList.add('wrong');
+    o.onclick = null;
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  fb.className = `feedback-box ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.innerHTML = isCorrect
+    ? `<p>✅ Chính xác! Đáp án: <strong>${correct}</strong></p>`
+    : `<p>❌ Sai! Đáp án đúng: <strong>${correct}. ${q.opts[['A','B','C','D'].indexOf(correct)]}</strong></p>`;
+
+  const btn = document.getElementById('nextBtn');
+  btn.disabled = false;
+  btn.textContent = quizIndex < quizQuestions.length - 1 ? 'Câu tiếp theo →' : 'Xem kết quả';
+}
+
+function nextQuestion() {
+  quizIndex++;
+  if (quizIndex < quizQuestions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  showScreen('result');
+  hideNav();
+  const total = quizAnswers.length;
+  const correct = quizAnswers.filter(a => a.isCorrect).length;
+  const pct = Math.round(correct / total * 100);
+  const wrong = quizAnswers.filter(a => !a.isCorrect);
+
+  let grade = '😔', color = 'var(--danger)';
+  if (pct >= 90) { grade = '🏆'; color = '#f59e0b'; }
+  else if (pct >= 70) { grade = '😊'; color = 'var(--success)'; }
+  else if (pct >= 50) { grade = '😐'; color = 'var(--warning)'; }
+
+  let wrongHTML = '';
+  if (wrong.length > 0) {
+    wrongHTML = `<div class="wrong-list-title">❌ ${wrong.length} câu sai cần ôn lại</div>`;
+    wrong.forEach(a => {
+      const cidx = ['A','B','C','D'].indexOf(a.correct);
+      wrongHTML += `<div class="wrong-item">
+        <div class="q-num">Câu ${a.q.n}</div>
+        <div class="q-text">${a.q.q}</div>
+        <div class="ans-row">
+          <div class="ans-tag yours">Bạn: ${a.chosen}. ${a.q.opts[['A','B','C','D'].indexOf(a.chosen)]}</div>
+          <div class="ans-tag correct">Đúng: ${a.correct}. ${a.q.opts[cidx]}</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('resultBody').innerHTML = `
+    <div style="--pct:${pct*3.6}deg">
+      <div class="result-circle" style="background:conic-gradient(${color} ${pct*3.6}deg, var(--surface) 0)">
+        <div class="result-pct">${pct}%</div>
+      </div>
+    </div>
+    <div class="result-title">${grade} ${pct >= 70 ? 'Xuất sắc!' : pct >= 50 ? 'Khá tốt!' : 'Cần cố gắng!'}</div>
+    <div class="result-sub">Đúng ${correct}/${total} câu</div>
+    <div class="result-stats">
+      <div class="res-stat"><div class="n" style="color:var(--success)">${correct}</div><div class="l">Đúng ✅</div></div>
+      <div class="res-stat"><div class="n" style="color:var(--danger)">${wrong.length}</div><div class="l">Sai ❌</div></div>
+      <div class="res-stat"><div class="n" style="color:var(--warning)">${pct}%</div><div class="l">Điểm</div></div>
+    </div>
+    ${wrongHTML}
+    <div class="result-btns">
+      <button class="btn-primary" onclick="startQuiz(quizQuestions[0]?.ch||'all','random')">🔄 Làm lại chương này</button>
+      ${wrong.length > 0 ? `<button class="btn-secondary" onclick="retryWrong()">❌ Ôn ${wrong.length} câu sai</button>` : ''}
+      <button class="btn-secondary" onclick="goHome()">🏠 Về trang chủ</button>
+    </div>
+  `;
+}
+
+function retryWrong() {
+  const wrongQs = quizAnswers.filter(a => !a.isCorrect).map(a => a.q);
+  quizQuestions = shuffle(wrongQs);
+  quizIndex = 0;
+  quizAnswers = [];
+  showScreen('quiz');
+  renderQuestion();
+}
+
+// ============================================================
+// REVIEW
+// ============================================================
+function buildReview() {
+  // Filter chips
+  const chipContainer = document.getElementById('reviewChapFilter');
+  chipContainer.innerHTML = '';
+  const all = document.createElement('span');
+  all.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:2px solid ' + (reviewFilter==='all'?'var(--primary)':'var(--border)') + ';background:' + (reviewFilter==='all'?'rgba(79,70,229,0.15)':'var(--surface)') + ';color:' + (reviewFilter==='all'?'var(--primary)':'var(--text-muted)');
+  all.textContent = 'Tất cả';
+  all.onclick = () => { reviewFilter='all'; buildReview(); };
+  chipContainer.appendChild(all);
+  CHAPTERS.forEach(ch => {
+    const chip = document.createElement('span');
+    chip.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:2px solid ' + (reviewFilter===ch.id?'var(--primary)':'var(--border)') + ';background:' + (reviewFilter===ch.id?'rgba(79,70,229,0.15)':'var(--surface)') + ';color:' + (reviewFilter===ch.id?'var(--primary)':'var(--text-muted)');
+    chip.textContent = ch.name;
+    chip.onclick = () => { reviewFilter=ch.id; buildReview(); };
+    chipContainer.appendChild(chip);
+  });
+
+  renderReview();
+}
+
+function filterReview() {
+  searchText = document.getElementById('searchInput').value.toLowerCase();
+  renderReview();
+}
+
+function renderReview() {
+  let filtered = reviewFilter === 'all' ? allQuestions : allQuestions.filter(q => q.ch === reviewFilter);
+  if (searchText) filtered = filtered.filter(q => q.q.toLowerCase().includes(searchText) || q.opts.some(o => o.toLowerCase().includes(searchText)));
+
+  const container = document.getElementById('reviewList');
+  container.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  filtered.forEach(q => {
+    const ch = CHAPTERS.find(c => c.id === q.ch);
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    let optsHTML = q.opts.map((opt, i) => {
+      const isCorrect = labels[i] === q.ans;
+      return `<div class="r-opt${isCorrect?' is-correct':''}">${labels[i]}. ${opt}</div>`;
+    }).join('');
+    div.innerHTML = `
+      <div class="r-chap">${ch.icon} ${ch.name}</div>
+      <div class="r-num">Câu ${q.n}</div>
+      <div class="r-q">${q.q}</div>
+      <div class="r-opts">${optsHTML}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Không tìm thấy câu hỏi nào</div>';
+  }
+}
+
+// ============================================================
+// FLASH CARD
+// ============================================================
+function buildFlashSelect() {
+  const sel = document.getElementById('flashChapSelect');
+  sel.innerHTML = '<option value="all">Tất cả chương</option>';
+  CHAPTERS.forEach(ch => {
+    const opt = document.createElement('option');
+    opt.value = ch.id;
+    opt.textContent = `${ch.name}: ${ch.full}`;
+    sel.appendChild(opt);
+  });
+}
+
+function loadFlash() {
+  const chId = document.getElementById('flashChapSelect').value;
+  flashQuestions = chId === 'all' ? [...allQuestions] : allQuestions.filter(q => q.ch === chId);
+  flashShuffled = [...flashQuestions];
+  flashIndex = 0;
+  renderFlash();
+}
+
+function startFlash(chId) {
+  showTab('flash');
+  document.getElementById('flashChapSelect').value = chId;
+  loadFlash();
+}
+
+function renderFlash() {
+  if (flashShuffled.length === 0) return;
+  const q = flashShuffled[flashIndex];
+  const ansIdx = ['A','B','C','D'].indexOf(q.ans);
+  document.getElementById('flashQ').textContent = q.q;
+  document.getElementById('flashAnsLetter').textContent = `Đáp án: ${q.ans}`;
+  document.getElementById('flashAnsFull').textContent = q.opts[ansIdx] || '';
+  document.getElementById('flashCount').textContent = `${flashIndex+1} / ${flashShuffled.length}`;
+  document.getElementById('flashCard').classList.remove('flipped');
+}
+
+function flipCard() { document.getElementById('flashCard').classList.toggle('flipped'); }
+function nextFlash() { flashIndex = (flashIndex+1) % flashShuffled.length; renderFlash(); }
+function prevFlash() { flashIndex = (flashIndex-1+flashShuffled.length) % flashShuffled.length; renderFlash(); }
+function shuffleFlash() { flashShuffled = shuffle([...flashShuffled]); flashIndex = 0; renderFlash(); toast('🔀 Đã xáo trộn!'); }
+function resetFlash() { flashShuffled = [...flashQuestions]; flashIndex = 0; renderFlash(); toast('🔄 Đã đặt lại!'); }
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(type) {
+  if (type === 'exam') {
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-title">📝 Thi thử</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Chọn số câu để thi thử</p>
+      <div class="count-selector" id="countSelector">
+        ${[10,20,30,50,100].map(n=>`<div class="count-opt ${n===30?'active':''}" onclick="selectCount(this,${n})">${n} câu</div>`).join('')}
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);margin:16px 0 8px">Chọn chương:</p>
+      <div class="modal-opts" id="examChapOpts">
+        <div class="modal-opt active" data-ch="all" onclick="selectExamChap(this)"><div class="modal-opt-label">Tất cả chương</div></div>
+        ${CHAPTERS.map(ch=>`<div class="modal-opt" data-ch="${ch.id}" onclick="selectExamChap(this)"><div class="modal-opt-label">${ch.icon} ${ch.name}</div></div>`).join('')}
+      </div>
+      <button class="modal-btn" onclick="startExam()">Bắt đầu thi !</button>
+    `;
+  } else if (type === 'review-wrong') {
+    const wrongCount = stats.wrong.size;
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-title">❌ Ôn câu sai</div>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">Hiện có <strong style="color:var(--danger)">${wrongCount}</strong> câu sai cần ôn</p>
+      <div class="modal-opts">
+        <div class="modal-opt" onclick="startQuizWrong('all');closeModal()"><div><div class="modal-opt-label">Tất cả câu sai</div><div class="modal-opt-sub">${wrongCount} câu</div></div><span>›</span></div>
+        ${CHAPTERS.map(ch=>{
+          const cnt = allQuestions.filter(q=>q.ch===ch.id && stats.wrong.has(q.id)).length;
+          return `<div class="modal-opt" onclick="startQuizWrong('${ch.id}');closeModal()"><div><div class="modal-opt-label">${ch.icon} ${ch.name}</div><div class="modal-opt-sub">${cnt} câu sai</div></div><span>›</span></div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+let examCount = 30, examChap = 'all';
+function selectCount(el, n) {
+  document.querySelectorAll('.count-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  examCount = n;
+}
+function selectExamChap(el) {
+  document.querySelectorAll('#examChapOpts .modal-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  examChap = el.dataset.ch;
+}
+function startExam() {
+  closeModal();
+  startQuiz(examChap, 'exam', examCount);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id + 'Screen').classList.add('active');
+}
+
+function showTab(tab) {
+  showScreen(tab === 'home' ? 'home' : tab);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  document.getElementById('bottomNav').style.display = 'flex';
+  if (tab === 'review') buildReview();
+  if (tab === 'home') buildHome();
+}
+
+function goHome() {
+  showScreen('home');
+  document.getElementById('bottomNav').style.display = 'flex';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('navHome').classList.add('active');
+  buildHome();
+}
+
+function hideNav() { document.getElementById('bottomNav').style.display = 'none'; }
+
+// ============================================================
+// UTILS
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildQuestions();
+loadStats();
+buildHome();
+buildFlashSelect();
+loadFlash();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  const qScreen = document.getElementById('quizScreen');
+  if (qScreen.classList.contains('active')) {
+    const map = {'a':0,'b':1,'c':2,'d':3,'1':0,'2':1,'3':2,'4':3};
+    const idx = map[e.key.toLowerCase()];
+    if (idx !== undefined) {
+      const opts = document.querySelectorAll('.option');
+      if (opts[idx]) opts[idx].click();
+    }
+    if (e.key === 'Enter' || e.key === ' ') {
+      const btn = document.getElementById('nextBtn');
+      if (!btn.disabled) btn.click();
+    }
+  }
+  if (['ArrowLeft','ArrowRight'].includes(e.key)) {
+    const flash = document.getElementById('flashScreen');
+    if (flash.classList.contains('active')) {
+      if (e.key === 'ArrowLeft') prevFlash();
+      else nextFlash();
+    }
+  }
+});
+
+// Swipe for flash
+let touchStartX = 0;
+document.getElementById('flashScreen').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.getElementById('flashScreen').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) { dx < 0 ? nextFlash() : prevFlash(); }
+});
+</script>
+</body>
+</html>
